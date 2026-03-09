@@ -1,0 +1,19 @@
+app:
+  name: "NLQ Multi-Agent"
+  version: "0.1.0"
+  log_level: "INFO"
+
+llm:
+  default_provider: "mega-llm"
+  default_model: "openai-gpt-oss-120b"
+  providers:
+    mega_llm:
+      model: "openai-gpt-oss-120b"
+      temperature: 0.2
+
+agents: {}
+
+workflows:
+  default: null
+
+databases: {}

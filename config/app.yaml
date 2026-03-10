@@ -4,14 +4,21 @@ app:
   log_level: "INFO"
 
 llm:
-  default_provider: "mega-llm"
+  default_provider: "mega_llm"
   default_model: "openai-gpt-oss-120b"
   providers:
     mega_llm:
       model: "openai-gpt-oss-120b"
       temperature: 0.2
 
-agents: {}
+agents:
+  guardrail:
+    llm_provider: "mega_llm"
+    auto_limit: 100
+    # Future schema guardrail settings (leave empty until schema is ready):
+    # blocked_tables: []
+    # blocked_columns: []
+    # require_tenant_isolation: false
 
 workflows:
   default: null

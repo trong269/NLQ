@@ -21,7 +21,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from langgraph.graph.graph import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph as CompiledGraph
 
 
 class BaseAgent(ABC):

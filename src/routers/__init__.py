@@ -19,7 +19,6 @@ from fastapi import FastAPI
 
 def register_routers(app: FastAPI) -> None:
     """Include all API routers into *app*."""
-    # Add routers here as the project grows:
-    # from src.routers.chat import router as chat_router
-    # app.include_router(chat_router)
-    pass
+    from src.routers.test_guardrail import router as test_guardrail_router
+
+    app.include_router(test_guardrail_router)

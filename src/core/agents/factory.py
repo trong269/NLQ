@@ -33,12 +33,15 @@ Usage
 from __future__ import annotations
 
 from src.core.agents.base import BaseAgent
+from src.core.agents.guardrail_agent import GuardrailAgent
 from src.utils import load_config
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Registry – map agent name  →  agent class
 # ─────────────────────────────────────────────────────────────────────────────
-AGENT_REGISTRY: dict[str, type[BaseAgent]] = {}
+AGENT_REGISTRY: dict[str, type[BaseAgent]] = {
+    "guardrail": GuardrailAgent,
+}
 
 
 class AgentFactory:

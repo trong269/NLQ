@@ -1,0 +1,37 @@
+app:
+  name: "NLQ Multi-Agent"
+  version: "0.1.0"
+  log_level: "INFO"
+
+llm:
+  default_provider: "mega_llm"
+  default_model: "openai-gpt-oss-120b"
+  providers:
+    mega_llm:
+      model: "openai-gpt-oss-120b"
+      base_url: "https://ai.megallm.io/v1"
+      temperature: 0.2
+
+agents:
+  guardrail:
+    llm_provider: "mega_llm"
+    auto_limit: 100
+    # Future schema guardrail settings (leave empty until schema is ready):
+    # blocked_tables: []
+    # blocked_columns: []
+    # require_tenant_isolation: false
+  schema_linking_agent:
+    llm_provider: "mega_llm"
+    llm_model: "openai-gpt-oss-120b"
+    tools: []
+  sql_gen_agent:
+    llm_provider: "mega_llm"
+    llm_model: "openai-gpt-oss-120b"
+    max_retries: 2
+
+workflows:
+  default: "nlq"
+  nlq: {}
+
+databases:
+  default: "mysql"

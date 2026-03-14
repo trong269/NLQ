@@ -19,6 +19,10 @@ agents:
     # blocked_tables: []
     # blocked_columns: []
     # require_tenant_isolation: false
+  schema_linking_agent:
+    llm_provider: "openai"
+    llm_model: "openai-gpt-oss-120b"
+    tools: []
 
 workflows:
   default: null

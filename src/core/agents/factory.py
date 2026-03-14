@@ -35,6 +35,7 @@ from __future__ import annotations
 from src.core.agents.base import BaseAgent
 from src.core.agents.guardrail_agent import GuardrailAgent
 from src.core.agents.schema_linking_agent import SchemaLinkingAgent
+from src.core.agents.sql_gen_agent import SqlGenAgent
 from src.utils import load_config
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -43,6 +44,7 @@ from src.utils import load_config
 AGENT_REGISTRY: dict[str, type[BaseAgent]] = {
     "guardrail": GuardrailAgent,
     "schema_linking_agent": SchemaLinkingAgent,
+    "sql_gen_agent": SqlGenAgent,
 }
 
 

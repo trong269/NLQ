@@ -22,6 +22,7 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from src.databases.factory import DatabaseFactory
 from src.routers import register_routers
 from src.utils import load_config
 
@@ -42,8 +43,21 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application startup / shutdown lifecycle hooks."""
     logger.info("Starting %s v%s", app.title, app.version)
-    yield
-    logger.info("Shutting down %s", app.title)
+    db_type = _config.get("databases", {}).get("default", "mysql")
+    db = DatabaseFactory.create(db_type)
+
+    # Connect to DB eagerly at startup so uvicorn only serves when DB is ready.
+    await db.connect()
+    await db.execute("SELECT 1")
+    app.state.db = db
+    logger.info("Database '%s' connected", db_type)
+
+    try:
+        yield
+    finally:
+        await db.disconnect()
+        logger.info("Database '%s' disconnected", db_type)
+        logger.info("Shutting down %s", app.title)
 
 
 app = FastAPI(

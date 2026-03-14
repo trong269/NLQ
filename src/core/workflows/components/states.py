@@ -27,3 +27,28 @@ class WorkflowState(TypedDict):
 
     # Populated by the last agent when the workflow is done
     final_answer: str
+
+
+# ── NLQ pipeline workflow state ───────────────────────────────────────────────
+
+class NlqState(TypedDict):
+    """State flowing through the full NLQ pipeline: guardrail → schema linking → SQL gen."""
+
+    # Input
+    nl_input: str
+
+    # Guardrail outputs
+    guardrail_verdict: str           # PASS | HARD_BLOCK
+    guardrail_block_reason: str
+    guardrail_warnings: list[str]
+    guardrail_message: str
+
+    # Schema linking outputs
+    schema_linking_raw: str          # raw JSON string from LLM
+    schema_linking: dict | None      # parsed JSON (None if unparseable)
+
+    # SQL generation outputs
+    sql_query: str
+    sql_status: str                  # success | failed
+    sql_result: list
+    sql_error_message: str

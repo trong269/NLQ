@@ -42,3 +42,23 @@ class GuardrailState(TypedDict):
     block_reason: str      # technical reason (set on HARD_BLOCK)
     warnings: Annotated[list[str], _append_warnings]  # non-blocking diagnostics
     message: str           # human-readable response returned to the caller
+
+
+# ── SQL Generation agent state ────────────────────────────────────────────────
+
+class SqlGenState(TypedDict):
+    """State for the SQL Generation agent."""
+
+    # Inputs
+    nl_input: str        # original natural language query
+    schema_context: str  # schema linking output (JSON string from SchemaLinkingAgent)
+
+    # Processing
+    sql_query: str       # most recently generated SQL
+    sql_error: str       # execution error message (empty when none)
+    retry_count: int     # number of retries attempted so far
+
+    # Outputs
+    status: str          # "running" | "success" | "failed"
+    result: list         # rows returned from the DB (empty on failure)
+    error_message: str   # human-readable message when status == "failed"

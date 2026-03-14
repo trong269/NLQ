@@ -31,12 +31,15 @@ Usage
 from __future__ import annotations
 
 from src.databases.base import BaseDatabase
+from src.databases.mysql_database import MySQLDatabase
 from src.utils import load_config
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Registry – map database type  →  adapter class
 # ─────────────────────────────────────────────────────────────────────────────
-DATABASE_REGISTRY: dict[str, type[BaseDatabase]] = {}
+DATABASE_REGISTRY: dict[str, type[BaseDatabase]] = {
+    "mysql": MySQLDatabase,
+}
 
 
 class DatabaseFactory:

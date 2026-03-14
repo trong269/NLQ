@@ -9,6 +9,7 @@ llm:
   providers:
     mega_llm:
       model: "openai-gpt-oss-120b"
+      base_url: "https://ai.megallm.io/v1"
       temperature: 0.2
 
 agents:
@@ -23,8 +24,14 @@ agents:
     llm_provider: "mega_llm"
     llm_model: "openai-gpt-oss-120b"
     tools: []
+  sql_gen_agent:
+    llm_provider: "mega_llm"
+    llm_model: "openai-gpt-oss-120b"
+    max_retries: 2
 
 workflows:
-  default: null
+  default: "nlq"
+  nlq: {}
 
-databases: {}
+databases:
+  default: "mysql"

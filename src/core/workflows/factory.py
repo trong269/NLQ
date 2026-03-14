@@ -34,12 +34,15 @@ Usage
 from __future__ import annotations
 
 from src.core.workflows.base import BaseWorkflow
+from src.core.workflows.nlq_workflow import NlqWorkflow
 from src.utils import load_config
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Registry – map workflow name  →  workflow class
 # ─────────────────────────────────────────────────────────────────────────────
-WORKFLOW_REGISTRY: dict[str, type[BaseWorkflow]] = {}
+WORKFLOW_REGISTRY: dict[str, type[BaseWorkflow]] = {
+    "nlq": NlqWorkflow,
+}
 
 
 class WorkflowFactory:

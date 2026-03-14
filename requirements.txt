@@ -19,3 +19,7 @@ langchain-google-genai>=1.0.6
 
 # LangGraph
 langgraph>=0.1.19
+
+# Database
+sqlalchemy>=2.0.30
+pymysql>=1.1.1

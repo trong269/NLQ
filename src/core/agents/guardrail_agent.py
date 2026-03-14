@@ -43,7 +43,7 @@ class GuardrailAgent(BaseAgent):
     """Prompt-injection guardrail for raw NL input."""
 
     def build_graph(self) -> CompiledGraph:
-        llm = LLMFactory.create(provider=self.config.get("llm_provider", "mega_llm"))
+        llm = LLMFactory.create(provider=self.config.get("llm_provider"))
 
         graph = StateGraph(GuardrailState)
 

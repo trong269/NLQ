@@ -101,7 +101,4 @@ agents:
 ---
 
 ## Ghi chú
-
-- Agent **chỉ xử lý NL input**. Không có SQL nào tồn tại ở bước này.
 - Mọi verdict `HARD_BLOCK` đều là **hard block** — không có fallback hay retry.
-- `sqlglot` (AST parser) và các phase schema/performance check đã bị loại bỏ khỏi scope hiện tại.

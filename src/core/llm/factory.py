@@ -13,6 +13,7 @@ Usage
 """
 
 from __future__ import annotations
+
 import os
 
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -48,16 +49,15 @@ class LLMFactory:
 
         match provider:
             case "mega_llm":
-                import os
-                from langchain_openai import ChatOpenAI
+                from langchain_openai import ChatOpenAI  # noqa: PLC0415
                 return ChatOpenAI(
-                    model="openai-gpt-oss-120b",
-                    base_url="https://ai.megallm.io/v1",
-                    api_key = os.getenv("MEGALLM_API_KEY"),
-                    temperature= 0.2
+                    model=model,
+                    base_url=provider_cfg.get("base_url", "https://ai.megallm.io/v1"),
+                    api_key=os.getenv("MEGALLM_API_KEY"),
+                    temperature=temperature,
                 )
             case _:
                 raise ValueError(
                     f"Unknown LLM provider '{provider}'. "
-                    "Supported: 'openai', 'anthropic', 'google'."
+                    "Supported: 'mega_llm'."
                 )

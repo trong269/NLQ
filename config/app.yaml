@@ -20,7 +20,7 @@ agents:
     # blocked_columns: []
     # require_tenant_isolation: false
   schema_linking_agent:
-    llm_provider: "openai"
+    llm_provider: "mega_llm"
     llm_model: "openai-gpt-oss-120b"
     tools: []
 

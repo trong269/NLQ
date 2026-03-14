@@ -164,3 +164,42 @@ def route_nlq_after_guardrail(state: NlqState) -> str:
     Conditional edge: skip the rest of the pipeline when guardrail blocks.
     """
     return "schema_linking" if state.get("guardrail_verdict") != "HARD_BLOCK" else "__end__"
+
+
+async def node_nlq_run_reflection(state: NlqState, config: RunnableConfig) -> dict:
+    """
+    Run ReflectionAgent to verify generated SQL correctness.
+    """
+    from src.core.agents.factory import AgentFactory  # noqa: PLC0415
+
+    sql_query = state.get("sql_query", "")
+    if not sql_query:
+        return {"reflection_raw": "", "reflection": None}
+
+    agent = AgentFactory.create("reflection_agent")
+
+    result = await agent.ainvoke(
+        {
+            "user_query": state["nl_input"],
+            "generated_sql": sql_query,
+        }
+    )
+
+    # lấy raw message 
+    messages = result.get("messages", [])
+    raw = ""
+    if messages:
+        content = getattr(messages[-1], "content", "")
+        raw = content if isinstance(content, str) else str(content)
+
+    # parse JSON
+    import json
+    try:
+        parsed = json.loads(raw) if raw else None
+    except json.JSONDecodeError:
+        parsed = None
+
+    return {
+        "reflection_raw": raw,
+        "reflection": parsed,
+    }

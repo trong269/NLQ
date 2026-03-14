@@ -21,13 +21,17 @@ agents:
     # blocked_columns: []
     # require_tenant_isolation: false
   schema_linking_agent:
-    llm_provider: "mega_llm"
+    llm_provider: "openai"
     llm_model: "openai-gpt-oss-120b"
     tools: []
   sql_gen_agent:
     llm_provider: "mega_llm"
     llm_model: "openai-gpt-oss-120b"
     max_retries: 2
+  reflection_agent:
+    llm_provider: "mega_llm"
+    llm_model: "openai-gpt-oss-120b"
+    tools: []
 
 workflows:
   default: "nlq"

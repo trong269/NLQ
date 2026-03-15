@@ -87,7 +87,7 @@ async def run_workflow(body: WorkflowRequest, request: Request) -> WorkflowRespo
     return WorkflowResponse(
         guardrail=guardrail,
         schema_linking=schema_linking,
-        schema_linking_raw=None if schema_linking is not None else schema_raw,
+        schema_linking_raw=schema_raw,
         sql_query=state.get("sql_query") or None,
         sql_status=state.get("sql_status") or None,
         sql_result=state.get("sql_result") or None,

@@ -106,35 +106,49 @@ async def node_nlq_run_guardrail(state: NlqState) -> dict:
 
 
 async def node_nlq_run_schema_linking(state: NlqState, config: RunnableConfig) -> dict:
-    """
-    Fetch the DB schema then run SchemaLinkingAgent.
-    ``db`` must be injected via ``config["configurable"]["db"]``.
-    """
-    from src.core.agents.factory import AgentFactory  # noqa: PLC0415
+    from src.core.agents.factory import AgentFactory
+    from langchain_core.messages import AIMessage
+    import json
 
     db = (config.get("configurable") or {}).get("db")
     if db is None:
-        return {"schema_linking_raw": "", "schema_linking": None}
+        return {
+            "database_schema": "",
+            "schema_linking_raw": "",
+            "schema_linking": None,
+        }
 
     database_schema = await db.get_schema_text()
 
     agent = AgentFactory.create("schema_linking_agent")
+
     result = await agent.ainvoke(
-        {"user_query": state["nl_input"], "database_schema": database_schema}
+        {
+            "user_query": state["nl_input"],
+            "database_schema": database_schema,
+        }
     )
 
     messages = result.get("messages", [])
+
     raw = ""
-    if messages:
-        content = getattr(messages[-1], "content", "")
-        raw = content if isinstance(content, str) else str(content)
+
+    for msg in reversed(messages):
+        if isinstance(msg, AIMessage):
+            raw = msg.content
+            break
 
     try:
-        parsed: dict | None = json.loads(raw) if raw else None
+        parsed = json.loads(raw) if raw else None
     except json.JSONDecodeError:
         parsed = None
-
-    return {"schema_linking_raw": raw, "schema_linking": parsed}
+    print("RAW:", raw)
+    print("PARSED:", parsed)
+    return {
+        "database_schema": database_schema,
+        "schema_linking_raw": raw,
+        "schema_linking": parsed,
+    }
 
 
 async def node_nlq_run_sql_gen(state: NlqState, config: RunnableConfig) -> dict:

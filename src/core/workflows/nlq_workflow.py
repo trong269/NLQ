@@ -52,7 +52,9 @@ from src.core.workflows.components.nodes import (
     node_nlq_run_guardrail,
     node_nlq_run_schema_linking,
     node_nlq_run_sql_gen,
+    node_nlq_run_reflection,
     route_nlq_after_guardrail,
+    route_nlq_after_reflection
 )
 from src.core.workflows.components.states import NlqState
 
@@ -67,6 +69,7 @@ class NlqWorkflow(BaseWorkflow):
         graph.add_node("guardrail",       node_nlq_run_guardrail)
         graph.add_node("schema_linking",  node_nlq_run_schema_linking)
         graph.add_node("sql_gen",         node_nlq_run_sql_gen)
+        graph.add_node("reflection",      node_nlq_run_reflection)
 
         graph.set_entry_point("initialize")
         graph.add_edge("initialize", "guardrail")
@@ -79,6 +82,14 @@ class NlqWorkflow(BaseWorkflow):
             },
         )
         graph.add_edge("schema_linking", "sql_gen")
-        graph.add_edge("sql_gen", END)
+        graph.add_edge("sql_gen", "reflection")
+        graph.add_conditional_edges(
+            "reflection",
+            route_nlq_after_reflection,
+            {
+                "retry": "sql_gen",
+                "__end__": END,
+            },
+        )
 
         return graph.compile()

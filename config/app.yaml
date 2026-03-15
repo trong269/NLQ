@@ -28,10 +28,18 @@ agents:
     llm_provider: "mega_llm"
     llm_model: "openai-gpt-oss-120b"
     max_retries: 2
+  reflection_agent:
+    llm_provider: "mega_llm"
+    llm_model: "openai-gpt-oss-120b"
+    tools: []
 
 workflows:
   default: "nlq"
   nlq: {}
 
 databases:
-  default: "mysql"
+  default: "postgres"
+  postgres:
+    url: "${DATABASE_URL}"
+    pool_size: 5
+    max_overflow: 10

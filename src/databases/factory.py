@@ -32,6 +32,7 @@ from __future__ import annotations
 
 from src.databases.base import BaseDatabase
 from src.databases.mysql_database import MySQLDatabase
+from src.databases.postgres import PostgresDatabase
 from src.utils import load_config
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ from src.utils import load_config
 # ─────────────────────────────────────────────────────────────────────────────
 DATABASE_REGISTRY: dict[str, type[BaseDatabase]] = {
     "mysql": MySQLDatabase,
+    "postgres": PostgresDatabase,
 }
 
 

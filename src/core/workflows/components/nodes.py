@@ -85,6 +85,9 @@ async def node_nlq_initialize(state: NlqState) -> dict:
         "sql_status": "",
         "sql_result": [],
         "sql_error_message": "",
+        "reflection_raw": "",
+        "reflection": None,
+        "reflection_retry_count": 0,
     }
 
 
@@ -164,3 +167,88 @@ def route_nlq_after_guardrail(state: NlqState) -> str:
     Conditional edge: skip the rest of the pipeline when guardrail blocks.
     """
     return "schema_linking" if state.get("guardrail_verdict") != "HARD_BLOCK" else "__end__"
+
+
+async def node_nlq_run_reflection(state: NlqState, config: RunnableConfig) -> dict:
+    """
+    Run ReflectionAgent to verify generated SQL correctness.
+    """
+    from src.core.agents.factory import AgentFactory
+    import json
+
+    sql_query = state.get("sql_query", "")
+    if not sql_query:
+        return {
+            "reflection_raw": "",
+            "reflection": None,
+            "reflection_retry": False,
+        }
+
+    agent = AgentFactory.create("reflection_agent")
+
+    result = await agent.ainvoke(
+        {
+            "user_query": state["nl_input"],
+            "generated_sql": sql_query,
+            "database_schema": state.get("database_schema", ""),
+            "query_result": state.get("sql_result", [])[:5],
+        }
+    )
+
+    messages = result.get("messages", [])
+    raw = ""
+
+    if messages:
+        content = getattr(messages[-1], "content", "")
+        raw = content if isinstance(content, str) else str(content)
+
+    try:
+        parsed = json.loads(raw) if raw else None
+    except json.JSONDecodeError:
+        parsed = None
+
+    retry_count = state.get("reflection_retry_count", 0)
+
+    # quyết định retry
+    should_retry = (
+        parsed
+        and parsed.get("verdict") == "RETRY"
+        and retry_count < 2
+    )
+
+    if should_retry:
+        return {
+            "reflection_raw": raw,
+            "reflection": parsed,
+            "reflection_retry": True,
+            "reflection_retry_count": retry_count + 1,
+
+            # reset SQL state
+            "sql_result": [],
+            "sql_error": "",
+        }
+
+    return {
+        "reflection_raw": raw,
+        "reflection": parsed,
+        "reflection_retry": False,
+        "reflection_retry_count": retry_count,
+    }
+
+MAX_REFLECTION_RETRY = 3
+
+def route_nlq_after_reflection(state: NlqState) -> str:
+
+    reflection = state.get("reflection")
+    retry_count = state.get("reflection_retry_count", 0)
+
+    if not isinstance(reflection, dict):
+        return "__end__"
+
+    if reflection.get("is_correct"):
+        return "__end__"
+
+    if retry_count >= MAX_REFLECTION_RETRY:
+        return "__end__"
+
+    return "retry"

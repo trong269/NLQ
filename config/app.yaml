@@ -40,6 +40,6 @@ workflows:
 databases:
   default: "postgres"
   postgres:
-    url: "postgresql+asyncpg://postgres:Longthieugia876@localhost:5432/NLQ"
+    url: "${DATABASE_URL}"
     pool_size: 5
     max_overflow: 10

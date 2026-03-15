@@ -21,7 +21,7 @@ agents:
     # blocked_columns: []
     # require_tenant_isolation: false
   schema_linking_agent:
-    llm_provider: "openai"
+    llm_provider: "mega_llm"
     llm_model: "openai-gpt-oss-120b"
     tools: []
   sql_gen_agent:
@@ -38,4 +38,8 @@ workflows:
   nlq: {}
 
 databases:
-  default: "mysql"
+  default: "postgres"
+  postgres:
+    url: "postgresql+asyncpg://postgres:Longthieugia876@localhost:5432/NLQ"
+    pool_size: 5
+    max_overflow: 10

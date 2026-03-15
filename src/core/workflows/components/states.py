@@ -46,9 +46,14 @@ class NlqState(TypedDict):
     # Schema linking outputs
     schema_linking_raw: str          # raw JSON string from LLM
     schema_linking: dict | None      # parsed JSON (None if unparseable)
-
+    database_schema: str  
     # SQL generation outputs
     sql_query: str
     sql_status: str                  # success | failed
     sql_result: list
     sql_error_message: str
+
+    # Reflection outputs
+    reflection_raw: str             
+    reflection: dict | None
+    reflection_retry_count: int

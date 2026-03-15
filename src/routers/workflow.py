@@ -46,6 +46,8 @@ class WorkflowResponse(BaseModel):
     sql_status: str | None = None
     sql_result: list | None = None
     sql_error_message: str | None = None
+    reflection: dict | None = None
+    reflection_raw: str | None = None
 
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
@@ -57,6 +59,7 @@ async def run_workflow(body: WorkflowRequest, request: Request) -> WorkflowRespo
       1. Guardrail – blocks prompt injection attempts
       2. Schema Linking – identifies relevant tables/columns
       3. SQL Generation – generates and executes SQL with auto-retry
+      4. Reflection – verify the SQL correctness using the query result and retry generation if needed.
     """
     db = getattr(request.app.state, "db", None)
     if db is None:
@@ -89,4 +92,6 @@ async def run_workflow(body: WorkflowRequest, request: Request) -> WorkflowRespo
         sql_status=state.get("sql_status") or None,
         sql_result=state.get("sql_result") or None,
         sql_error_message=state.get("sql_error_message") or None,
+        reflection=state.get("reflection"),
+        reflection_raw=state.get("reflection_raw")
     )

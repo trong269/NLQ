@@ -38,7 +38,7 @@ workflows:
   nlq: {}
 
 databases:
-  default: "postgres"
+  default: "mysql"
   postgres:
     url: "${DATABASE_URL}"
     pool_size: 5

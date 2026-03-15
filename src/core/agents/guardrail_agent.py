@@ -12,7 +12,7 @@ Pipeline
   initialize → scan_nl → END
 
   scan_nl uses an LLM to detect prompt-injection attempts with
-  structured output (HIGH/MEDIUM → HARD_BLOCK, LOW → WARNING).
+  structured output (HIGH/MEDIUM/LOW → HARD_BLOCK).
 
 Usage
 ─────

@@ -66,8 +66,7 @@ def node_guardrail_scan_nl(llm: BaseChatModel) -> Callable[[GuardrailState], dic
     """
     Prompt-injection scan on the natural language input.
 
-    HIGH / MEDIUM confidence  →  HARD_BLOCK
-    LOW confidence            →  non-blocking WARNING
+    HIGH / MEDIUM / LOW confidence  →  HARD_BLOCK
     """
 
     async def _node(state: GuardrailState) -> dict:
@@ -75,15 +74,13 @@ def node_guardrail_scan_nl(llm: BaseChatModel) -> Callable[[GuardrailState], dic
 
         result = await scan_prompt_injection(state["nl_input"], llm)
 
-        if result.is_injection and result.confidence in ("HIGH", "MEDIUM"):
+        if result.is_injection and result.confidence in ("HIGH", "MEDIUM", "LOW"):
             block_reason = f"[PromptInjection/{result.confidence}] {result.reason}"
             return {
                 "verdict": _HARD_BLOCK,
                 "block_reason": block_reason,
                 "message": f"Xin lỗi, tôi không có quyền truy cập SQL như yêu cầu của bạn. Lý do: {block_reason}",
             }
-        if result.is_injection:   # LOW – warn but do not block
-            return {"warnings": [f"[PromptInjection/LOW] {result.reason}"]}
         return {}
 
     return _node

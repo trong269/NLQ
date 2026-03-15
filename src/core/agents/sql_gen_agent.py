@@ -14,31 +14,6 @@ Pipeline
                           └── success → END
                           └── failed  → END  (after _MAX_RETRIES attempts)
 
-  - ``generate`` calls the LLM with the NL question and schema context.
-    On retries, the previous SQL and its error are injected so the LLM
-    can self-correct.
-  - ``execute`` runs the generated SQL against the database injected via
-    LangGraph's configurable config:
-
-        await agent.ainvoke(inputs, config={"configurable": {"db": db_instance}})
-
-  - After _MAX_RETRIES failed attempts the agent sets status="failed" and
-    populates ``error_message`` with a Vietnamese description.
-
-Usage
-─────
-    from src.core.agents.sql_gen_agent import SqlGenAgent
-    from src.utils import load_config
-
-    agent = SqlGenAgent(config=load_config()["agents"]["sql_gen_agent"])
-    result = await agent.ainvoke(
-        {"nl_input": "Top 5 customers by revenue", "schema_context": schema_json},
-        config={"configurable": {"db": db}},
-    )
-    # result["status"]        → "success" | "failed"
-    # result["sql_query"]     → str
-    # result["result"]        → list[dict]  (rows)
-    # result["error_message"] → str  (non-empty when failed)
 """
 
 from __future__ import annotations

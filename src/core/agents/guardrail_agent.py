@@ -1,28 +1,8 @@
 """
 src/core/agents/guardrail_agent.py
 ───────────────────────────────────
-GuardrailAgent – scans the user's natural language input for security threats
-BEFORE any SQL is generated.
-
 This is the first gate in the NL→SQL workflow.  Only `nl_input` is required;
 there is no SQL at this stage.
-
-Pipeline
-────────
-  initialize → scan_nl → END
-
-  scan_nl uses an LLM to detect prompt-injection attempts with
-  structured output (HIGH/MEDIUM/LOW → HARD_BLOCK).
-
-Usage
-─────
-    from src.core.agents.factory import AgentFactory
-
-    agent = AgentFactory.create("guardrail")
-    result = await agent.ainvoke({"nl_input": "show all orders from last month"})
-    # result["verdict"]      → "PASS" | "HARD_BLOCK"
-    # result["warnings"]     → list[str]
-    # result["block_reason"] → str  (empty when PASS)
 """
 
 from __future__ import annotations

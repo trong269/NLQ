@@ -63,3 +63,8 @@ langchain_cache/
 # ── Logs ──────────────────────────────────────────────────────────────────────
 *.log
 logs/
+
+#eval_results/
+eval_results/
+run_eval.py
+batch_evaluate.py

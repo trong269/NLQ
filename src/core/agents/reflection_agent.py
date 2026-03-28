@@ -27,7 +27,6 @@ from src.core.llm.factory import LLMFactory
 from src.core.prompts.factory import PromptFactory
 from src.core.tools.factory import ToolFactory
 
-
 class ReflectionAgent(BaseAgent):
     """
     Agent responsible for SQL reflection in the NLQ→SQL pipeline.
@@ -104,6 +103,8 @@ class ReflectionAgent(BaseAgent):
             route_after_llm,
             {
                 "__end__": END,
+                "call_llm": "call_llm",
+                "run_tools": END, 
             },
         )
 

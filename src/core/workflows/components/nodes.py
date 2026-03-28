@@ -161,11 +161,18 @@ async def node_nlq_run_sql_gen(state: NlqState, config: RunnableConfig) -> dict:
 
     sql_gen_cfg = load_config().get("agents", {}).get("sql_gen_agent", {})
     agent = SqlGenAgent(config=sql_gen_cfg)
+    
+    inputs = {
+        "nl_input": state["nl_input"],
+        "schema_context": state.get("schema_linking_raw", ""),
+    }
+    
+    if state.get("reflection_raw"):
+        inputs["sql_error"] = state.get("reflection_raw", "")
+        inputs["sql_query"] = state.get("sql_query", "")
+
     result = await agent.ainvoke(
-        {
-            "nl_input": state["nl_input"],
-            "schema_context": state.get("schema_linking_raw", ""),
-        },
+        inputs,
         config=config,  # db flows through configurable
     )
     return {
@@ -223,33 +230,27 @@ async def node_nlq_run_reflection(state: NlqState, config: RunnableConfig) -> di
 
     retry_count = state.get("reflection_retry_count", 0)
 
-    # quyết định retry
-    should_retry = (
-        parsed
-        and parsed.get("verdict") == "RETRY"
-        and retry_count < 2
-    )
+    is_correct = bool(parsed and parsed.get("is_correct", False))
 
-    if should_retry:
+    if not is_correct:
         return {
             "reflection_raw": raw,
             "reflection": parsed,
-            "reflection_retry": True,
             "reflection_retry_count": retry_count + 1,
 
-            # reset SQL state
+            # reset SQL state so it can re-execute cleanly next round
             "sql_result": [],
-            "sql_error": "",
+            "sql_status": "",
+            "sql_error_message": "",
         }
 
     return {
         "reflection_raw": raw,
         "reflection": parsed,
-        "reflection_retry": False,
         "reflection_retry_count": retry_count,
     }
 
-MAX_REFLECTION_RETRY = 3
+MAX_REFLECTION_RETRY = 2
 
 def route_nlq_after_reflection(state: NlqState) -> str:
 

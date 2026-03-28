@@ -20,24 +20,39 @@ from src.core.agents.components.states import AgentState, GuardrailState, SqlGen
 # Generic tool-calling agent nodes
 # ═════════════════════════════════════════════════════════════════════════════
 
+def _get_max_retries_llm() -> int:
+    from src.utils import load_config
+    return load_config().get("agents", {}).get("llm_agent", {}).get("max_retries", 2)
+
 def node_call_llm(llm_with_tools: BaseChatModel) -> Callable[[AgentState], dict]:
-    """
-    Return an async node that invokes *llm_with_tools* with the current
-    message history and appends the response.
-    """
-
     async def _node(state: AgentState) -> dict:
-        response = await llm_with_tools.ainvoke(state["messages"])
-        return {"messages": [response]}
-
+        max_retries = _get_max_retries_llm()
+        retry_count = state.get("retry_count", 0)
+        if retry_count >= max_retries:
+            return {
+                "status": "failed",
+                "error_message": f"Đã vượt quá số lần thử ({max_retries})"
+            }
+        try:
+            response = await llm_with_tools.ainvoke(state["messages"])
+            return {"messages": [response], "retry_count": 0, "status": "running"}
+        except Exception as exc:
+            return {
+                "retry_count": retry_count + 1,
+                "status": "running",
+                "error_message": str(exc)
+            }
     return _node
 
-
 def route_after_llm(state: AgentState) -> str:
-    """
-    Conditional edge: if the last message has tool calls, route to
-    ``"run_tools"``; otherwise end the graph.
-    """
+    max_retries = _get_max_retries_llm()
+    retry_count = state.get("retry_count", 0)
+    if state.get("status") == "failed" or retry_count >= max_retries:
+        return "__end__"
+        
+    if state.get("status") == "running" and retry_count > 0:
+        return "call_llm"
+        
     last_message = state["messages"][-1]
     if getattr(last_message, "tool_calls", None):
         return "run_tools"
@@ -98,8 +113,8 @@ def _get_max_retries() -> int:
 async def node_sql_gen_initialize(state: SqlGenState) -> dict:
     """Reset all output fields before the SQL generation pipeline starts."""
     return {
-        "sql_query": "",
-        "sql_error": "",
+        "sql_query": state.get("sql_query", ""),
+        "sql_error": state.get("sql_error", ""),
         "retry_count": 0,
         "status": "running",
         "result": [],
@@ -114,11 +129,11 @@ def node_sql_gen_generate(llm: BaseChatModel) -> Callable[[SqlGenState], dict]:
     On the first attempt ``retry_context`` is empty.
     On retries the previous SQL and error are included so the LLM can self-correct.
     """
-    import re  # noqa: PLC0415
+    import re  
 
-    from langchain_core.messages import HumanMessage, SystemMessage  # noqa: PLC0415
+    from langchain_core.messages import HumanMessage, SystemMessage 
 
-    from src.core.prompts.factory import PROMPTS_DIR, PromptFactory  # noqa: PLC0415
+    from src.core.prompts.factory import PROMPTS_DIR, PromptFactory 
 
     system_text = PromptFactory.render("sql_gen_system")
     raw_human = (PROMPTS_DIR / "sql_gen_human.md").read_text(encoding="utf-8")
